@@ -3161,13 +3161,16 @@ class RadliteSpectrum():
         if self.get_attr("verbose"): #Verbal output, if so desired
             print("Resampling to user-specified spectrum resolution...")
         #For emission-spectrum (em. only)
-        interpfunc = interper(x=fullmu_arr, y=resem_arr) #Interp. func.
+        interpfunc = interper(x=fullmu_arr, y=resem_arr, bounds_error=False,
+                              fill_value='extrapolate') #Interp. func.
         outem_arr = interpfunc(outmu_arr) #Interpolated output emission-spec.
         #For line-spectrum (em.+cont.)
-        interpfunc = interper(x=fullmu_arr, y=resy_arr) #Interp. func.
+        interpfunc = interper(x=fullmu_arr, y=resy_arr, bounds_error=False,
+                              fill_value='extrapolate') #Interp. func.
         outy_arr = interpfunc(outmu_arr) #Interpolated output line-spec.
         #For continuum (cont. only)
-        interpfunc = interper(x=fullmu_arr, y=fullcont_arr) #Interp. func.
+        interpfunc = interper(x=fullmu_arr, y=fullcont_arr, bounds_error=False,
+                              fill_value='extrapolate') #Interp. func.
         outcont_arr = interpfunc(outmu_arr) #Interpolated output continuum
         #For frequencies
         outfreq_arr = c0/(outmu_arr*1.0E-4) #Hz
