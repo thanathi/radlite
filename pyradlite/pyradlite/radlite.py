@@ -1371,26 +1371,32 @@ class RadliteModel():
         if self.get_attr("verbose"): #Verbal output, if so desired
             print("Extracting partition function info from "
                                         +self.get_attr("psumfile")+"...")
-        specieslist = alllines[1].split() #List of all chemical species' names
-        numspecies = len(specieslist) #Number of chemical species
-        molmassarr = np.asarray(alllines[2].split()
-                                        ).astype(float) #List of all mol. mass
+        species_iso_list = [int(x.split()[0]) for x in alllines]  # List of iso_num for all chemical species
+        numspecies = len(species_iso_list) #Number of chemical species
+        molmassarr = np.asarray([x.split()[1] for x in alllines]).astype(float) # List of all mol. mass
+        q_file_list = [x.strip().split()[2] for x in alllines] # list of file names, each containing partition sum information for each species
+
         if self.get_attr("verbose"): #Verbal output, if so desired
             print("There are a total of "+str(numspecies)+" chemical species "
                                         +"in "+self.get_attr("psumfile")+".")
 
         #Extract info for requested molecule (chemical species)
         try: #Try to determine index of requested molecule
-            iind = specieslist.index(self.get_attr("molname")) #Mol's index
+            iind = species_iso_list.index(self.get_attr("isonum")) #Mol's index
         except ValueError: #If requested molecule not present in list
             raise ValueError("Oh no! No partition sum table found in "
                             +self.get_attr("psumfile")+" for the requested "
                             +"molecule "+self.get_attr("molname")+".")
-        psumtemparr = np.array([float(alllines[ai].split()[0])
-                                    for ai in range(3, len(alllines))]) #Temp.
-        psumarr = np.array([float(alllines[ai].split()[iind+1])
-                                    for ai in range(3, len(alllines))]) #Part.
+        
+        q_file = self.get_attr("hit_path") + 'Q/' + q_file_list[iind]  # there must be a directory Q under hit_path.
 
+        if self.get_attr("verbose"): #Verbal output, if so desired
+            print("Loading partition information for "+self.get_attr("molname")+" "
+                                        +"from "+q_file+" ...")
+
+        q_data = np.genfromtxt(q_file)
+        psumtemparr = q_data[:, 0] # temperature
+        psumarr = q_data[:, 1] # partition function
 
         ##Below Section: STORE partition info + EXIT
         self._set_attr(attrname="_psum", attrval=psumarr)
